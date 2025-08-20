@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import copy
 import logging
 import os
@@ -75,6 +76,7 @@ class TextChatAtOAI(BaseFnCallModel):
                 if 'request_timeout' in kwargs:
                     kwargs['timeout'] = kwargs.pop('request_timeout')
                 logger.info(f"calling chat_completion service={api_kwargs}, args={args}, kwargs={kwargs}")
+                logger.info(f"calling chat_completion kwargs={json.dumps(kwargs, ensure_ascii=False, indent=2)")
                 client = openai.OpenAI(**api_kwargs)
                 return client.chat.completions.create(*args, **kwargs)
 
@@ -89,6 +91,7 @@ class TextChatAtOAI(BaseFnCallModel):
                 if 'request_timeout' in kwargs:
                     kwargs['timeout'] = kwargs.pop('request_timeout')
                 logger.info(f"calling chat_completion service={api_kwargs}, args={args}, kwargs={kwargs}")
+                logger.info(f"calling chat_completion kwargs={json.dumps(kwargs, ensure_ascii=False, indent=2)")
                 client = openai.OpenAI(**api_kwargs)
                 return client.completions.create(*args, **kwargs)
 
