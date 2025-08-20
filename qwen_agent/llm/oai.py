@@ -74,7 +74,7 @@ class TextChatAtOAI(BaseFnCallModel):
                             kwargs['extra_body'][k] = kwargs.pop(k)
                 if 'request_timeout' in kwargs:
                     kwargs['timeout'] = kwargs.pop('request_timeout')
-
+                logger.info(f"calling chat_completion service={api_kwargs}, args={args}, kwargs={kwargs}")
                 client = openai.OpenAI(**api_kwargs)
                 return client.chat.completions.create(*args, **kwargs)
 
@@ -88,7 +88,7 @@ class TextChatAtOAI(BaseFnCallModel):
                             kwargs['extra_body'][k] = kwargs.pop(k)
                 if 'request_timeout' in kwargs:
                     kwargs['timeout'] = kwargs.pop('request_timeout')
-
+                logger.info(f"calling chat_completion service={api_kwargs}, args={args}, kwargs={kwargs}")
                 client = openai.OpenAI(**api_kwargs)
                 return client.completions.create(*args, **kwargs)
 
@@ -155,6 +155,7 @@ class TextChatAtOAI(BaseFnCallModel):
                         if full_tool_calls:
                             res += full_tool_calls
                         yield res
+                logger.info(f"llm_output: {json.dumps({'reasoning_content': full_reasoning_content, "content": full_response, "full_tool_calls": full_tool_calls}, ensure_ascii=False)}")
         except OpenAIError as ex:
             raise ModelServiceError(exception=ex)
 
@@ -167,12 +168,14 @@ class TextChatAtOAI(BaseFnCallModel):
         try:
             response = self._chat_complete_create(model=self.model, messages=messages, stream=False, **generate_cfg)
             if hasattr(response.choices[0].message, 'reasoning_content'):
+                logger.info(f"llm_output: {json.dumps({'reasoning_content': response.choices[0].message.reasoning_content, "content": response.choices[0].message.content}, ensure_ascii=False)}")
                 return [
                     Message(role=ASSISTANT,
                             content=response.choices[0].message.content,
                             reasoning_content=response.choices[0].message.reasoning_content)
                 ]
             else:
+                logger.info(f"llm_output: {json.dumps({"content": response.choices[0].message.content}, ensure_ascii=False)}")
                 return [Message(role=ASSISTANT, content=response.choices[0].message.content)]
         except OpenAIError as ex:
             raise ModelServiceError(exception=ex)
